@@ -10,12 +10,12 @@
       font-family: 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
-      min-height: 100vh; /* full height */
+      min-height: 100vh;
       margin: 0;
     }
 
     main {
-      flex: 1; /* take all available space */
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -79,9 +79,7 @@
       <form method="POST" enctype="multipart/form-data">
         <input type="file" name="private_key" accept=".pem" required>
         <button type="submit">Continue ➜</button>
-        {% if error %}
         <div class="error">{{ error }}</div>
-        {% endif %}
       </form>
     </div>
   </main>
