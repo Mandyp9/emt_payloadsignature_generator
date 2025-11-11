@@ -26,7 +26,7 @@ def get_private_key():
 
 
 def render_html(filename, **context):
-    """Simple template renderer for root HTML files."""
+    """Load HTML file from root and replace {{ variable }} placeholders."""
     with open(filename, "r") as f:
         html = f.read()
     for key, value in context.items():
@@ -61,25 +61,27 @@ def sign_without():
     if "pem_file" not in session:
         return redirect(url_for("upload_key"))
 
+    error = ""
+    timestamp = ""
+    signing_string = ""
+    signature = ""
+
     if request.method == "POST":
         timestamp = str(int(time.time()))
         try:
             private_key = get_private_key()
+            signing_string = timestamp
+            hash_obj = SHA256.new(signing_string.encode("utf-8"))
+            signature_bytes = pkcs1_15.new(private_key).sign(hash_obj)
+            signature = base64.b64encode(signature_bytes).decode("utf-8")
         except Exception as e:
-            return render_html("sign_without.html", error=str(e), timestamp="", signing_string="", signature="")
+            error = str(e)
 
-        signing_string = timestamp.encode("utf-8")
-        hash_obj = SHA256.new(signing_string)
-        signature = pkcs1_15.new(private_key).sign(hash_obj)
-        signature_base64 = base64.b64encode(signature).decode("utf-8")
-
-        return render_html("sign_without.html",
-                           error="",
-                           timestamp=timestamp,
-                           signing_string=timestamp,
-                           signature=signature_base64)
-
-    return render_html("sign_without.html", error="", timestamp="", signing_string="", signature="")
+    return render_html("sign_without.html",
+                       error=error,
+                       timestamp=timestamp,
+                       signing_string=signing_string,
+                       signature=signature)
 
 
 @app.route("/sign-with", methods=["GET", "POST"])
@@ -87,53 +89,42 @@ def sign_with():
     if "pem_file" not in session:
         return redirect(url_for("upload_key"))
 
+    error = ""
     payload_str = ""
     timestamp = ""
+    signing_string = ""
+    signature = ""
 
     if request.method == "POST":
         payload_str = request.form.get("payload", "").strip()
         timestamp = request.form.get("timestamp", "").strip()
-
         if not timestamp:
             timestamp = str(int(time.time()))
-
+        
         try:
             payload = json.loads(payload_str)
         except Exception:
-            return render_html("sign_with.html",
-                               error="Invalid JSON payload",
-                               payload=payload_str,
-                               timestamp=timestamp,
-                               signing_string="",
-                               signature="")
-
-        try:
-            private_key = get_private_key()
-        except Exception as e:
-            return render_html("sign_with.html",
-                               error=str(e),
-                               payload=payload_str,
-                               timestamp=timestamp,
-                               signing_string="",
-                               signature="")
-
-        payload_canonical = json.dumps(payload, separators=(",", ":"))
-        data_bytes = (payload_canonical + timestamp).encode("utf-8")
-
-        hash_obj = SHA256.new(data_bytes)
-        signature = pkcs1_15.new(private_key).sign(hash_obj)
-        signature_base64 = base64.b64encode(signature).decode("utf-8")
-
-        return render_html("sign_with.html",
-                           error="",
-                           payload=payload_str,
-                           timestamp=timestamp,
-                           signing_string=payload_canonical + timestamp,
-                           signature=signature_base64)
+            error = "Invalid JSON payload"
+            payload = {}
+        
+        if not error:
+            try:
+                private_key = get_private_key()
+                payload_canonical = json.dumps(payload, separators=(",", ":"))
+                signing_string = payload_canonical + timestamp
+                hash_obj = SHA256.new(signing_string.encode("utf-8"))
+                signature_bytes = pkcs1_15.new(private_key).sign(hash_obj)
+                signature = base64.b64encode(signature_bytes).decode("utf-8")
+            except Exception as e:
+                error = str(e)
 
     return render_html("sign_with.html",
-                       error="",
+                       error=error,
                        payload=payload_str,
                        timestamp=timestamp,
-                       signing_string="",
-                       signature="")
+                       signing_string=signing_string,
+                       signature=signature)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
