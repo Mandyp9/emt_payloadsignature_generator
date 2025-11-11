@@ -143,7 +143,6 @@
       font-weight: 500;
     }
 
-    /* Footer styling */
     footer {
       text-align: center;
       padding: 8px 0;
@@ -154,7 +153,6 @@
       flex-shrink: 0;
     }
 
-    /* Copy button styling */
     .copy-btn {
       margin-top: 10px;
       background: #00e5ff;
@@ -171,7 +169,6 @@
       background: #00bcd4;
     }
 
-    /* Toast notification styling */
     #toast {
       position: fixed;
       top: 20px;
@@ -206,18 +203,15 @@
 
       <form method="POST">
         <label>Payload (JSON):</label>
-        <textarea name="payload" rows="5" required placeholder='{"controlNumber":"77711646525","cancelReason":"test"}'>{{ payload or '' }}</textarea>
+        <textarea name="payload" rows="5" required placeholder='{"controlNumber":"77711646525","cancelReason":"test"}'>{{ payload }}</textarea>
 
         <label>Timestamp (optional):</label>
-        <input type="text" name="timestamp" placeholder="Leave blank for current time" value="{{ timestamp or '' }}">
+        <input type="text" name="timestamp" placeholder="Leave blank for current time" value="{{ timestamp }}">
 
         <button type="submit">Generate Signature</button>
 
-        {% if error %}
-          <div class="error">{{ error }}</div>
-        {% endif %}
+        <div class="error">{{ error }}</div>
 
-        {% if signature %}
         <div class="output">
           <span class="label">Timestamp:</span>
           <div class="value">{{ timestamp }}</div>
@@ -229,7 +223,6 @@
           <div class="value" id="signature">{{ signature }}</div>
           <button type="button" class="copy-btn" onclick="copySignature()">Copy Signature</button>
         </div>
-        {% endif %}
       </form>
     </div>
   </main>
@@ -238,7 +231,6 @@
     &copy; Made by Mandeep. All rights reserved.
   </footer>
 
-  <!-- Toast element -->
   <div id="toast">Signature copied!</div>
 
   <script>
