@@ -112,7 +112,12 @@
       word-wrap: break-word;
     }
 
-    /* Footer styling */
+    .error {
+      color: #ff5252;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
     footer {
       text-align: center;
       padding: 8px 0;
@@ -123,7 +128,6 @@
       flex-shrink: 0;
     }
 
-    /* Copy button styling */
     .copy-btn {
       margin-top: 10px;
       background: #00e5ff;
@@ -140,7 +144,6 @@
       background: #00bcd4;
     }
 
-    /* Toast notification styling */
     #toast {
       position: fixed;
       top: 20px;
@@ -176,7 +179,8 @@
       <form method="POST">
         <button type="submit">Generate Signature</button>
 
-        {% if signature %}
+        <div class="error">{{ error }}</div>
+
         <div class="output">
           <span class="label">Timestamp:</span>
           <div class="value">{{ timestamp }}</div>
@@ -189,18 +193,15 @@
 
           <button type="button" class="copy-btn" onclick="copySignature()">Copy Signature</button>
         </div>
-        {% endif %}
       </form>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer>
     &copy; Made by Mandeep. All rights reserved.
   </footer>
 
-  <!-- Toast element -->
-  <div id="toast"> Signature copied!</div>
+  <div id="toast">Signature copied!</div>
 
   <script>
     function copySignature() {
