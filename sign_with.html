@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign With Payload</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #0b1221, #000);
+      color: #e0f7fa;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 40px 0;
+    }
+
+    .container {
+      width: 750px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 50px;
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
+    .back {
+      color: #00e5ff;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      transition: 0.3s;
+    }
+
+    .back:hover {
+      color: #00bcd4;
+      transform: translateX(-4px);
+    }
+
+    h1 {
+      text-align: center;
+      color: #00e5ff;
+      font-size: 28px;
+      margin-bottom: 30px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    }
+
+    form {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-weight: 500;
+      margin: 15px 0 8px;
+      color: #80deea;
+    }
+
+    textarea, input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      color: #fff;
+      font-size: 15px;
+      resize: vertical;
+    }
+
+    textarea:focus, input:focus {
+      outline: none;
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+    }
+
+    button {
+      margin-top: 25px;
+      background: #00e5ff;
+      color: #000;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00bcd4;
+      transform: scale(1.05);
+    }
+
+    .output {
+      margin-top: 35px;
+      background: rgba(0, 255, 255, 0.04);
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 25px;
+      font-family: monospace;
+      text-align: left;
+      line-height: 1.6;
+      color: #b2ebf2;
+    }
+
+    .output .label {
+      color: #00e5ff;
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+
+    .output .value {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .error {
+      color: #ff5252;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 8px 0;
+      font-size: 12px;
+      color: #888;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* Copy button styling */
+    .copy-btn {
+      margin-top: 10px;
+      background: #00e5ff;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .copy-btn:hover {
+      background: #00bcd4;
+    }
+
+    /* Toast notification styling */
+    #toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #00e5ff;
+      color: #000;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,229,255,0.5);
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      z-index: 9999;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="container">
+      <div class="top-bar">
+        <a href="/mode" class="back">← Back</a>
+      </div>
+
+      <h1>Sign With Payload</h1>
+
+      <form method="POST">
+        <label>Payload (JSON):</label>
+        <textarea name="payload" rows="5" required placeholder='{"controlNumber":"77711646525","cancelReason":"test"}'>{{ payload or '' }}</textarea>
+
+        <label>Timestamp (optional):</label>
+        <input type="text" name="timestamp" placeholder="Leave blank for current time" value="{{ timestamp or '' }}">
+
+        <button type="submit">Generate Signature</button>
+
+        {% if error %}
+          <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if signature %}
+        <div class="output">
+          <span class="label">Timestamp:</span>
+          <div class="value">{{ timestamp }}</div>
+
+          <span class="label">Signing String:</span>
+          <div class="value">{{ signing_string }}</div>
+
+          <span class="label">Signature (Base64):</span>
+          <div class="value" id="signature">{{ signature }}</div>
+          <button type="button" class="copy-btn" onclick="copySignature()">Copy Signature</button>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    &copy; Made by Mandeep. All rights reserved.
+  </footer>
+
+  <!-- Toast element -->
+  <div id="toast">Signature copied!</div>
+
+  <script>
+    function copySignature() {
+      const sig = document.getElementById('signature').innerText;
+      navigator.clipboard.writeText(sig).then(() => {
+        showToast("Signature copied!");
+      }).catch(err => {
+        showToast("Failed to copy signature");
+        console.error(err);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
